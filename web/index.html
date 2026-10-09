@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="FilePilot: a secure Groq-powered workspace for reading and searching resume documents."
+    />
+    <meta name="theme-color" content="#f7f7fc" id="theme-color" />
+    <title>FilePilot Workspace Assistant</title>
+    <script>
+      (() => {
+        const savedTheme = localStorage.getItem("filepilot-theme");
+        const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        document.documentElement.dataset.theme = savedTheme === "dark" || savedTheme === "light" ? savedTheme : systemTheme;
+      })();
+    </script>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Primary navigation">
+        <a class="brand" href="#dashboard" data-route="dashboard" aria-label="FilePilot home">
+          <span class="brand-mark" aria-hidden="true">F</span>
+          <span><strong>FilePilot</strong><small>Workspace Assistant</small></span>
+        </a>
+        <nav class="nav-list">
+          <button class="nav-item active" data-route="dashboard"><span>◫</span>Dashboard</button>
+          <button class="nav-item" data-route="explorer"><span>□</span>File Explorer</button>
+          <button class="nav-item" data-route="assistant"><span>✦</span>AI Assistant</button>
+          <button class="nav-item" data-route="search"><span>⌕</span>Search</button>
+        </nav>
+        <div class="security-card">
+          <span class="security-icon">⌾</span>
+          <div><strong>Local sandbox</strong><small>File access stays inside the configured workspace.</small></div>
+        </div>
+        <div class="sidebar-footer">
+          <span class="avatar">FP</span>
+          <div><strong>Local operator</strong><small id="sidebar-provider">Checking provider…</small></div>
+        </div>
+      </aside>
+
+      <main class="main-content">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Workspace / resumes</p>
+            <h1 id="page-title">Resume Workspace</h1>
+          </div>
+          <div class="topbar-actions">
+            <button class="theme-toggle" id="theme-toggle" type="button" aria-pressed="false" aria-label="Switch to dark mode">
+              <span class="theme-icon" aria-hidden="true">☾</span>
+              <span id="theme-label">Dark</span>
+            </button>
+            <div class="runtime-status" id="runtime-status" aria-live="polite">
+              <span class="status-dot pending"></span>
+              <span>Connecting…</span>
+            </div>
+          </div>
+        </header>
+
+        <section class="page active" data-page="dashboard">
+          <div class="hero-card">
+            <div>
+              <span class="badge">SECURE LOCAL WORKSPACE</span>
+              <h2>Find the right signal in every resume.</h2>
+              <p>Search, inspect, and summarize PDF, DOCX, and TXT documents with verified local tools.</p>
+              <div class="hero-actions">
+                <button class="button primary" id="dashboard-upload">Upload documents</button>
+                <button class="button secondary" data-route="assistant">Ask FilePilot</button>
+              </div>
+            </div>
+            <div class="hero-orbit" aria-hidden="true">
+              <span class="orbit orbit-one"></span><span class="orbit orbit-two"></span>
+              <span class="hero-glyph">F</span>
+            </div>
+          </div>
+
+          <div class="section-heading">
+            <div><p class="eyebrow">Live inventory</p><h2>Workspace metrics</h2></div>
+            <button class="text-button" id="refresh-dashboard">Refresh data ↻</button>
+          </div>
+          <div class="metric-grid" id="metric-grid" aria-live="polite"></div>
+
+          <div class="dashboard-grid">
+            <section class="panel">
+              <div class="panel-heading"><div><p class="eyebrow">Get started</p><h2>Suggested prompts</h2></div></div>
+              <div class="prompt-grid">
+                <button class="prompt-card" data-prompt="Find every resume mentioning Python and summarize the relevant experience.">
+                  <span>01</span><strong>Find Python experience</strong><small>Search every supported format</small>
+                </button>
+                <button class="prompt-card" data-prompt="Compare the technical skills in all resumes and identify the strongest candidates.">
+                  <span>02</span><strong>Compare candidates</strong><small>Generate a grounded overview</small>
+                </button>
+                <button class="prompt-card" data-prompt="Create output/candidate-summary.md with a concise summary of the strongest candidates.">
+                  <span>03</span><strong>Create a summary</strong><small>Write a Markdown deliverable</small>
+                </button>
+              </div>
+            </section>
+            <section class="panel">
+              <div class="panel-heading"><div><p class="eyebrow">Recently indexed</p><h2>Documents</h2></div><button class="text-button" data-route="explorer">View all</button></div>
+              <div class="recent-list" id="recent-list"></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="page" data-page="explorer">
+          <div class="toolbar panel">
+            <label class="search-box"><span>⌕</span><input id="file-filter" type="search" placeholder="Filter files by name…" /></label>
+            <div class="filter-group" role="group" aria-label="File type">
+              <button class="chip active" data-extension="">All</button>
+              <button class="chip" data-extension=".pdf">PDF</button>
+              <button class="chip" data-extension=".docx">DOCX</button>
+              <button class="chip" data-extension=".txt">TXT</button>
+            </div>
+            <button class="button primary compact" id="explorer-upload">Upload</button>
+          </div>
+          <div class="drop-zone" id="drop-zone">
+            <strong>Drop resume files here</strong>
+            <span>PDF, DOCX, or TXT · protected by the configured file-size limit</span>
+          </div>
+          <div class="section-heading">
+            <div><p class="eyebrow" id="file-count-label">Loading inventory</p><h2>Documents</h2></div>
+            <select id="file-sort" aria-label="Sort files"><option value="modified">Newest first</option><option value="name">Name A–Z</option><option value="size">Largest first</option></select>
+          </div>
+          <div class="file-grid" id="file-grid" aria-live="polite"></div>
+        </section>
+
+        <section class="page assistant-page" data-page="assistant">
+          <div class="assistant-layout">
+            <div class="assistant-main panel">
+              <div class="assistant-header">
+                <div><span class="assistant-mark">✦</span><div><h2>FilePilot Assistant</h2><p id="assistant-model">Groq tool calling</p></div></div>
+                <span class="badge success">LOCAL TOOLS</span>
+              </div>
+              <div class="message-stream" id="message-stream" aria-live="polite">
+                <article class="message assistant-message">
+                  <span class="message-avatar">F</span>
+                  <div><strong>FilePilot</strong><p>I can list, read, search, and write files inside this workspace. What would you like to investigate?</p></div>
+                </article>
+              </div>
+              <form class="composer" id="assistant-form">
+                <textarea id="assistant-input" rows="3" maxlength="2000" placeholder="Ask about resumes, skills, experience, or create a summary…" required></textarea>
+                <div><small>Tool operations are validated locally.</small><button class="button primary" type="submit">Send ↑</button></div>
+              </form>
+            </div>
+            <aside class="assistant-aside panel">
+              <p class="eyebrow">Quick actions</p><h2>Try a workflow</h2>
+              <button class="quick-action" data-prompt="List all supported resume files and group them by extension.">List workspace files <span>→</span></button>
+              <button class="quick-action" data-skill-summary="Kubernetes">Find Kubernetes skills <span>→</span></button>
+              <button class="quick-action" data-prompt="Read resumes/ethan-brooks-machine-learning-engineer.pdf and provide a three-bullet summary.">Summarize a PDF <span>→</span></button>
+              <div class="guardrail-card"><strong>Strict project scope</strong><p>Only resume and workspace-file queries are accepted. Unrelated questions are rejected before Groq is called.</p></div>
+            </aside>
+          </div>
+        </section>
+
+        <section class="page" data-page="search">
+          <div class="search-hero panel">
+            <p class="eyebrow">Literal, case-insensitive search</p>
+            <h2>Search across every resume</h2>
+            <form id="search-form"><label class="search-box large"><span>⌕</span><input id="search-input" maxlength="200" placeholder="Try Python, Kubernetes, or project management…" required /></label><button class="button primary" type="submit">Search workspace</button></form>
+          </div>
+          <div class="search-summary" id="search-summary"></div>
+          <div class="search-results" id="search-results"></div>
+        </section>
+      </main>
+
+      <nav class="mobile-nav" aria-label="Mobile navigation">
+        <button class="active" data-route="dashboard"><span>◫</span>Home</button>
+        <button data-route="explorer"><span>□</span>Files</button>
+        <button data-route="assistant"><span>✦</span>Assistant</button>
+        <button data-route="search"><span>⌕</span>Search</button>
+      </nav>
+    </div>
+
+    <input id="file-input" type="file" accept=".pdf,.docx,.txt" multiple hidden />
+    <dialog id="viewer-dialog">
+      <div class="dialog-header"><div><p class="eyebrow">Document viewer</p><h2 id="viewer-title">Document</h2></div><button class="icon-button" id="close-viewer" aria-label="Close viewer">×</button></div>
+      <div class="document-meta" id="viewer-meta"></div>
+      <iframe id="viewer-frame" title="Original PDF document" hidden></iframe>
+      <pre id="viewer-content"></pre>
+    </dialog>
+    <div class="toast-region" id="toast-region" aria-live="polite"></div>
+    <script src="/app.js" defer></script>
+  </body>
+</html>

@@ -1,0 +1,20 @@
+Liam Chen
+Frontend Developer
+liam.chen@example.com
++1 202 555 0102
+Seattle, Washington
+
+PROFESSIONAL SUMMARY
+Frontend developer focused on accessible design systems and responsive web applications.
+
+SKILLS
+TypeScript, React, Next.js, CSS, Jest, WCAG
+
+EXPERIENCE
+Frontend Developer
+Harbor Digital | 2021 to Present
+- Created reusable React components used across four customer portals.
+- Added automated accessibility checks to the delivery pipeline.
+
+EDUCATION
+Bachelor of Design in Interaction Design, Western College, 2021

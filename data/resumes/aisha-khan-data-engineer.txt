@@ -1,0 +1,23 @@
+Aisha Khan
+Data Engineer
+aisha.khan@example.com
++1 202 555 0101
+Austin, Texas
+
+PROFESSIONAL SUMMARY
+Data engineer with five years of experience building reliable batch and streaming pipelines for analytics teams.
+
+SKILLS
+Python, SQL, Apache Spark, AWS, Airflow, Data modeling
+
+EXPERIENCE
+Data Engineer
+Northstar Analytics | 2022 to Present
+- Built Python and Spark pipelines processing 40 million records per day.
+- Reduced failed Airflow jobs by adding validation and retry policies.
+Junior Data Engineer
+Cedar Systems | 2020 to 2022
+- Maintained SQL transformations and AWS data-lake jobs.
+
+EDUCATION
+Bachelor of Science in Computer Science, Lakeside University, 2020
